@@ -1,7 +1,7 @@
 .idea
 *.pyc
 __pycache__
-/.vscode
+.vscode
 /uploaded_files
 node_modules
 static/build
