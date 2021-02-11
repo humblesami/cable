@@ -1,0 +1,6 @@
+.vscode
+*.pyc
+__pycache__
+migrations/*
+!__init.py__
+.idea
