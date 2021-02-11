@@ -121,3 +121,4 @@ STATIC_URL = '/static/'
 
 AUTH_PASSWORD_VALIDATORS = []
 INSTALLED_APPS.append('noman')
+INSTALLED_APPS.append('website')

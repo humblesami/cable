@@ -1,0 +1,13 @@
+.idea
+*.pyc
+__pycache__
+/.vscode
+/uploaded_files
+node_modules
+static/build
+/**/migrations/*.py
+!/**/migrations/__init__.py
+*.sqlite3
+config.json
+/media/*
+/static/*
