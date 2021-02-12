@@ -1,1 +1,0 @@
-web: gunicorn cable.wsgi --log-file -
