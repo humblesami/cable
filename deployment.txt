@@ -60,6 +60,9 @@ connect to git repo
 add runtime.txt to your project root directory with default language of project below is example
 python-3.8.5
 
+add Procfile with content (projectname is the name of your main module containing wsgi.py)
+web: gunicorn projectname.wsgi --log-file -
+
 push your update to git
 click deploy branch at heroku
 
