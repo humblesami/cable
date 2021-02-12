@@ -2,7 +2,7 @@ import sys
 import json
 import pytz
 import base64
-import requests
+#import requests
 import threading
 import traceback
 
@@ -130,28 +130,28 @@ def choices_to_list(choice_list):
     return lst
 
 
-def http(req_url, headers=None):
-    try:
-        res = ''
-        if headers:
-            res = requests.get(req_url, headers=headers)
-        else:
-            res = requests.get(req_url)
-        res = res.content
-    except:
-        res = 'Request failed because ' + str(sys.exc_info())
-        print(res)
-    return res
-
-
-def http_request(req_url):
-    try:
-        res = requests.get(req_url)
-        res = res._content.decode("utf-8")
-        return res
-    except:
-        res = get_error_message()
-        return res
+# def http(req_url, headers=None):
+#     try:
+#         res = ''
+#         if headers:
+#             res = requests.get(req_url, headers=headers)
+#         else:
+#             res = requests.get(req_url)
+#         res = res.content
+#     except:
+#         res = 'Request failed because ' + str(sys.exc_info())
+#         print(res)
+#     return res
+#
+#
+# def http_request(req_url):
+#     try:
+#         res = requests.get(req_url)
+#         res = res._content.decode("utf-8")
+#         return res
+#     except:
+#         res = get_error_message()
+#         return res
 
 def get_model(app_name, model_name):
     try:
