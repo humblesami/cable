@@ -51,6 +51,11 @@ local   all             all                                     md5
 sudo systemctl restart postgresql
 
 
+=======Deploy===========
+add
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+at the end of settings file as its required to deploy
+
 ================heroku starts============
 https://dashboard.heroku.com/
 go to heroku dashboard (signup first, if not already)
@@ -64,12 +69,17 @@ python-3.8.5
 #add Procfile with content (projectname is the name of your main module containing wsgi.py)
 #web: gunicorn projectname.wsgi --log-file -
 
-add requirements.txt with at least
-Django
+
+add requirements.txt with all required module like
+Django==3.1.5
+python-dateutil==2.8.1
 
 push your update to git
 click deploy branch at heroku
 
+add
+STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+at the end of settings file as its required to deploy
 
 heroku pg:reset DATABASE --app news92
 heroku run python manage.py reset --app news92
