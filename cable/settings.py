@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
+import django_heroku
 import os
 from pathlib import Path
 
@@ -119,6 +120,16 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "HOST": "ec2-34-237-89-96.compute-1.amazonaws.com",
+        "NAME": "dcfc4mnc6tfiec",
+        "USER": "fpqytnnzvzjfiw",
+        "PASSWORD": "c0ea37fe9e907d683bf32b8ffe2df9292583c335866690c412150a8a250e3e4f"
+    },
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -133,3 +144,4 @@ AUTH_PASSWORD_VALIDATORS = []
 ALLOWED_HOSTS = ['localhost', '127.0.01', 'cable-billing.herokuapp.com']
 INSTALLED_APPS.append('noman')
 INSTALLED_APPS.append('website')
+django_heroku.settings(locals())

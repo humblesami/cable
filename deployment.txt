@@ -64,6 +64,11 @@ allow hosts in setting file like by adding
 ALLOWED_HOSTS = ['localhost', '127.0.01', 'cable-billing.herokuapp.com']
 
 ================heroku starts============
+https://devcenter.heroku.com/articles/getting-started-with-python
+
+add database to heroku
+https://www.heroku.com/postgres
+
 https://dashboard.heroku.com/
 go to heroku dashboard (signup first, if not already)
 create new app
@@ -72,13 +77,33 @@ connect to git repo
 add runtime.txt to your project root directory with default language of project below is example
 python-3.8.5
 
+For django-heroku you will need
+sudo apt-get install libpq5=12.5-0ubuntu0.20.04.1
+sudo apt install libpq-dev
 
 add requirements.txt with all required module like
 Django==3.1.5
 whitenoise==5.2.0
+psycopg2-binary==2.8.6
+django-heroku==0.3.1
 gunicorn==20.0.4
 python-dateutil==2.8.1
 
+
+----------- cli -----------
+
+heroku run bash --app cable-billing
+
+-----------------If stuck with command line------------
+heroku ps --app cable-billing
+heroku ps:stop run.2787 --app cable-billing
+-----------------------------------------------
+
+For command line run
+heroku run python manage.py reset --app news92
+---------------------
+For gunicorn (efficient)
+------------
 
 you might need
 1.
@@ -97,8 +122,8 @@ add
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 at the end of settings file as its required to deploy
 
-heroku pg:reset DATABASE --app news92
-heroku run python manage.py reset --app news92
+
+
 
 ================heroku ends============
 
