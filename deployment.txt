@@ -57,7 +57,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 at the end of settings file as its required to deploy
 
 allow hosts in setting file like by adding
-ALLOWED_HOSTS = ['localhost', '127.0.01', 'https://cable-billing.herokuapp.com/']
+ALLOWED_HOSTS = ['localhost', '127.0.01', 'cable-billing.herokuapp.com']
 
 ================heroku starts============
 https://dashboard.heroku.com/
