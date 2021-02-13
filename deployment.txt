@@ -56,6 +56,10 @@ add
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 at the end of settings file as its required to deploy
 
+add middleware whitenose to deploy static alongwith degub
+'whitenoise.middleware.WhiteNoiseMiddleware',
+
+
 allow hosts in setting file like by adding
 ALLOWED_HOSTS = ['localhost', '127.0.01', 'cable-billing.herokuapp.com']
 
@@ -71,6 +75,7 @@ python-3.8.5
 
 add requirements.txt with all required module like
 Django==3.1.5
+whitenoise==5.2.0
 gunicorn==20.0.4
 python-dateutil==2.8.1
 
