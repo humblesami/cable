@@ -66,13 +66,14 @@ ALLOWED_HOSTS = ['localhost', '127.0.01', 'cable-billing.herokuapp.com']
 ================heroku starts============
 https://devcenter.heroku.com/articles/getting-started-with-python
 
-add database to heroku
-https://www.heroku.com/postgres
-
 https://dashboard.heroku.com/
 go to heroku dashboard (signup first, if not already)
 create new app
 connect to git repo
+
+Add resource postgresql
+then click the added resource and got settings/view credentials
+copy credentials of db to project setting file
 
 add runtime.txt to your project root directory with default language of project below is example
 python-3.8.5

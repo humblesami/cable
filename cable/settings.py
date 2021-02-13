@@ -123,10 +123,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "HOST": "ec2-34-237-89-96.compute-1.amazonaws.com",
-        "NAME": "dcfc4mnc6tfiec",
-        "USER": "fpqytnnzvzjfiw",
-        "PASSWORD": "c0ea37fe9e907d683bf32b8ffe2df9292583c335866690c412150a8a250e3e4f"
+        "HOST": "ec2-54-90-13-87.compute-1.amazonaws.com",
+        "NAME": "d5ja7hl6th93a2",
+        "USER": "ricxmdpzpknpnp",
+        "PASSWORD": "4e4764ec61044d60d2b3a492f03688ee7dafa7279c827407532efe1718ab3ca6"
     },
 }
 
