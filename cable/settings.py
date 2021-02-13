@@ -121,6 +121,6 @@ STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 AUTH_PASSWORD_VALIDATORS = []
-
+ALLOWED_HOSTS = ['localhost', '127.0.01', 'https://cable-billing.herokuapp.com/']
 INSTALLED_APPS.append('noman')
 INSTALLED_APPS.append('website')

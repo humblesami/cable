@@ -56,6 +56,9 @@ add
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 at the end of settings file as its required to deploy
 
+allow hosts in setting file like by adding
+ALLOWED_HOSTS = ['localhost', '127.0.01', 'https://cable-billing.herokuapp.com/']
+
 ================heroku starts============
 https://dashboard.heroku.com/
 go to heroku dashboard (signup first, if not already)
@@ -65,14 +68,22 @@ connect to git repo
 add runtime.txt to your project root directory with default language of project below is example
 python-3.8.5
 
-ignore following
-add Procfile with content (projectname is the name of your main module containing wsgi.py)
-web: gunicorn projectname.wsgi --log-file -
-
 
 add requirements.txt with all required module like
 Django==3.1.5
+gunicorn==20.0.4
 python-dateutil==2.8.1
+
+
+you might need
+1.
+add Procfile with content (projectname is the name of your main module containing wsgi.py)
+web: gunicorn projectname.wsgi --log-file -
+2.
+to install heroku cli as well
+sudo snap install --classic heroku
+and then in terminal
+heroku ps:scale web=1
 
 push your update to git
 click deploy branch at heroku
