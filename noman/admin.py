@@ -19,6 +19,7 @@ class AbstractAdmin(admin.ModelAdmin):
 
 class AreaAdmin(AbstractAdmin):
     list_display = ['name', 'status', 'created_at']
+    list_filter = ['status']
 
 
 class PackageTypeAdmin(AbstractAdmin):

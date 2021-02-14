@@ -9,20 +9,28 @@ class DefaultClass(models.Model):
     updated_at = models.DateTimeField(null=True, blank=True)
     created_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True,
-        related_query_name='%(app_label)s_%(class)s_created_by', 
+        related_query_name='%(app_label)s_%(class)s_created_by',
         related_name='%(app_label)s_%(class)s_created_by'
     )
     updated_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True,
-        related_name='%(app_label)s_%(class)s_updated_by', 
+        related_name='%(app_label)s_%(class)s_updated_by',
         related_query_name='%(app_label)s_%(class)s_updated_by'
     )
     class Meta:
         abstract = True
 
+
+# class AreaManager(models.Manager):
+#     def get_queryset(self):
+#         return super().get_queryset().filter(active=True)
+
+
 class Area(DefaultClass):
     class Meta:
         ordering  = ('name', 'created_at')
+
+    #objects = AreaManager()
     name= models.CharField(max_length=200)
     status = models.BooleanField()
     # created_at = models.DateTimeField()
@@ -42,7 +50,7 @@ class Package(DefaultClass):
     class Meta:
         pass
         #verbose_name_plural = 'Sami'
-        
+
     name= models.CharField(max_length=200)
     status = models.BooleanField()
     package_type = models.ForeignKey(PackageType, on_delete=models.CASCADE, related_name='packages', null=True)
@@ -70,7 +78,7 @@ class Client(DefaultClass):
     cnic = models.CharField(max_length=200, null=True, blank=True)
     address= models.CharField(max_length=1024, null=True, blank=True)
     # balance is here...
-    
+
     balance = models.IntegerField(null=True, blank=True, default=0)
     created_at = models.DateTimeField()
 
@@ -93,17 +101,17 @@ class ClientPackage(DefaultClass):
     connection_charges = models.IntegerField(default=0)
     connection_date = models.DateField()
     active = models.BooleanField(default=False)
-    
+
 
     def __str__(self):
         return self.client.name + '-' + self.package.name
-    
+
     def save(self, *args, **kwargs):
         res = super().save(args, kwargs)
         self.client.balance = self.price + self.connection_charges
         self.client.save()
         return res
-        
+
 
 class Payment(DefaultClass):
     class Meta:
@@ -118,7 +126,7 @@ class Payment(DefaultClass):
 
     def __str__(self):
         return '{}-{}-{}'.format(self.client_package.client.name, self.amount, self.payment_date)
-    
+
 
 
     def save(self, *args, **kwargs):
@@ -158,7 +166,7 @@ class Subscription(DefaultClass):
 
     def __str__(self):
         return 'Subscription-{}-{}-From: {}-To: {}'.format(self.client_package.client.name, self.payment.amount, self.start_date, self.end_date)
-    
+
 
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
