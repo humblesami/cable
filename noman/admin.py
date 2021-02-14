@@ -3,11 +3,9 @@ from .models import Area, Package, PackageType, Client, ClientPackage, Subscript
 from datetime import datetime
 
 
-class AreaAdmin(admin.ModelAdmin):
-    list_display = ['name', 'status', 'created_at']
-    readonly_fields = ['created_at', 'updated_at', 'created_by', 'updated_by']
-    readonly_fields = ['created_at', 'updated_at', 'created_by', 'updated_by']
+class AbstractAdmin(admin.ModelAdmin):
 
+    readonly_fields = ['created_at', 'updated_at', 'created_by', 'updated_by']
     def save_model(self, request, obj, form, change):
         obj.user = request.user
         if obj.pk:
@@ -17,6 +15,10 @@ class AreaAdmin(admin.ModelAdmin):
             obj.created_by_id = obj.user.id
             obj.created_at = datetime.now()
         super().save_model(request, obj, form, change)
+
+
+class AreaAdmin(AbstractAdmin):
+    list_display = ['name', 'status', 'created_at']
 
 
 class PackageTypeAdmin(admin.ModelAdmin):
