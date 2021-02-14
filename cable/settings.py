@@ -142,6 +142,8 @@ MIDDLEWARE = [
 ]
 AUTH_PASSWORD_VALIDATORS = []
 ALLOWED_HOSTS = ['localhost', '127.0.01', 'cable-billing.herokuapp.com']
+INSTALLED_APPS = ['my_admin'] + INSTALLED_APPS
 INSTALLED_APPS.append('noman')
 INSTALLED_APPS.append('website')
+
 django_heroku.settings(locals())
