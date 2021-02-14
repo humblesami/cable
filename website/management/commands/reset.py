@@ -50,18 +50,15 @@ class Command(BaseCommand):
                 os.remove(db_path)
             return 'done'
 
-        active_db = False
-        db_engine=None
+        db_engine = None
+        db_config = None
         if config_info:
-            active_db = config_info.get('active_db')
-            if active_db:
-                db_config = config_info.get(active_db)
-                if db_config:
-                    database_info = config_info[active_db]
-                    db_engine = database_info['ENGINE']
+            db_info = config_info.get('db_info')
+            if db_info:
+                db_config = db_info.get('config')
+                db_engine = db_info.get('name')
 
-
-        if not db_engine == 'sqlite':
+        if db_engine == 'sqlite':
             db_path = Path.as_posix(BASE_DIR) + '/db.sqlite3'
             if os.path.exists(db_path):
                 os.remove(db_path)
@@ -69,7 +66,7 @@ class Command(BaseCommand):
 
         db_host_connection = 'Wrong connection Info'
         try:
-            db_host_connection = self.connect_host(database_info, active_db)
+            db_host_connection = self.connect_host(db_config, db_engine)
         except Exception as e:
             db_host_connection = str(e)
             return db_host_connection
@@ -78,11 +75,11 @@ class Command(BaseCommand):
 
         db_cursor = db_host_connection.cursor()
         if hard_reset:
-            db_cursor.execute('DROP DATABASE if exists ' + database_info['NAME'])
-            db_cursor.execute('CREATE DATABASE ' + database_info['NAME'])
+            db_cursor.execute('DROP DATABASE if exists ' + db_config['NAME'])
+            db_cursor.execute('CREATE DATABASE ' + db_config['NAME'])
             res = 'done'
         elif create:
-            db_cursor.execute('CREATE DATABASE ' + database_info['NAME'])
+            db_cursor.execute('CREATE DATABASE ' + db_config['NAME'])
         db_cursor.close()
         db_host_connection.close()
         return res

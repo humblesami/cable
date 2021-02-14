@@ -9,7 +9,6 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-import django_heroku
 import os
 from pathlib import Path
 
@@ -119,6 +118,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+import json
+import django_heroku
+
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 DATABASES = {
     "default": {
@@ -129,6 +132,20 @@ DATABASES = {
         "PASSWORD": "4e4764ec61044d60d2b3a492f03688ee7dafa7279c827407532efe1718ab3ca6"
     },
 }
+
+config_path = (str(BASE_DIR)+'/config.json')
+if os.path.exists(config_path):
+    with open(config_path, 'r') as site_config:
+        config_info = json.load(site_config)
+        env = config_info.get('env')
+        if env == 'local':
+            DATABASES['default'] = {
+                "ENGINE": "django.db.backends.postgresql",
+                "HOST": "localhost",
+                "NAME": "d5ja7hl6th93a2",
+                "USER": "odoo",
+                "PASSWORD": "123"
+            }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -145,5 +162,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.01', 'cable-billing.herokuapp.com']
 INSTALLED_APPS = ['my_admin'] + INSTALLED_APPS
 INSTALLED_APPS.append('noman')
 INSTALLED_APPS.append('website')
+
+SITE_ID = 1
 
 django_heroku.settings(locals())

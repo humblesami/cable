@@ -12,3 +12,4 @@ static/build
 config.json
 /media/*
 /static/*
+/django
