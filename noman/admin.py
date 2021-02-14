@@ -21,6 +21,21 @@ class AreaAdmin(AbstractAdmin):
     list_display = ['name', 'status', 'created_at']
     list_filter = ['status']
 
+    def changelist_view(self, request, extra_context=None):
+        status = request.GET.get('status__exact')
+        if status == None:
+            q = request.GET.copy()
+            q['status__exact'] = 1
+            request.GET = q
+            request.META['QUERY_STRING'] = request.GET.urlencode()
+        else:
+            q = request.GET.copy()
+            if q.get('status__exact'):
+                del q['status__exact']
+            request.GET = q
+            request.META['QUERY_STRING'] = request.GET.urlencode()
+        return super().changelist_view(request, extra_context=extra_context)
+
 
 class PackageTypeAdmin(AbstractAdmin):
     list_display= ['name']
