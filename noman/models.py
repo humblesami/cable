@@ -178,7 +178,7 @@ def add_months(source_date, months):
 
 
 def add_one_month_to_date(given_date):
-    given_date = methods.add_interval('days', 1, given_date)
+    given_date = methods.add_interval('days', -1, given_date)
     return add_months(given_date, 1)
 
 

@@ -93,7 +93,8 @@ python-dateutil==2.8.1
 
 ----------- after heroku cli installed  run command -----------
 
-heroku run python manage.py migrate
+heroku run python manage.py makemigrations --app app_name
+heroku run python manage.py migrate --app app_name
 heroku run bash --app cable-billing
 
 -----------------If stuck with command line------------
@@ -123,8 +124,6 @@ click deploy branch at heroku
 add
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 at the end of settings file as its required to deploy
-
-
 
 
 ================heroku ends============
