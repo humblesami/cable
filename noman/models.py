@@ -164,12 +164,13 @@ class Payment(DefaultClass):
             price_charged -= last_payment.price_charged
 
         customer_balance = customer_balance + amount - price_charged
-        if self.subscription.client.balance < 0:
+        if customer_balance < 0:
             amount_error = 'Amount must be greater than or equal to ' + str(amount + (customer_balance * -1))
             raise ValueError(
                 amount_error
             )
 
+        self.subscription.client.balance = customer_balance
         self.subscription.client.save()
         self.renewal_start_date = renewal_start_date
         renewal_end_date = add_one_month_to_date(renewal_start_date)
