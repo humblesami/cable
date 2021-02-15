@@ -1,4 +1,7 @@
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.db import IntegrityError
+from django.http import HttpResponseRedirect
+
 from .models import Area, Package, PackageType, Client, Subscription, Payment
 from datetime import datetime
 
@@ -6,6 +9,11 @@ from datetime import datetime
 class AbstractAdmin(admin.ModelAdmin):
 
     readonly_fields = ['created_at', 'updated_at', 'created_by', 'updated_by']
+
+    class Media:
+        js = (
+            'https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js',  # jquery
+        )
 
     def save_model(self, request, obj, form, change):
         obj.user = request.user
@@ -33,7 +41,7 @@ class PackageTypeAdmin(AbstractAdmin):
 
 
 class PackageAdmin(AbstractAdmin):
-    list_display= ['name','package_type']
+    list_display= ['name', 'package_type']
     search_fields = ['name', 'package_type']
     list_filter = ['package_type']
 
@@ -46,10 +54,32 @@ class ClientAdmin(AbstractAdmin):
 
 
 class PaymentAdmin(AbstractAdmin):
+    list_display = ['__str__', 'price_charged']
     readonly_fields = ['renewal_start_date', 'renewal_end_date', 'price_charged', 'created_at', 'updated_at', 'created_by', 'updated_by']
+
+    def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
+        res = super(PaymentAdmin, self).render_change_form(request, context, add, change, form_url, obj)
+        return res
+
+        # return TemplateResponse(request, form_template or [
+        #     "admin/%s/%s/change_form.html" % (app_label, opts.model_name),
+        #     "admin/%s/change_form.html" % app_label,
+        #     "admin/change_form.html"
+        # ], context)
+
+    def save_model(self, request, obj, form, change):
+        obj.user = request.user
+        if obj.pk:
+            obj.updated_by_id = obj.user.id
+            obj.updated_at = datetime.now()
+        else:
+            obj.created_by_id = obj.user.id
+            obj.created_at = datetime.now()
+        super().save_model(request, obj, form, change)
 
 
 class SubscriptionAdmin(AbstractAdmin):
+    list_display = ['__str__', 'price', 'connection_charges']
     readonly_fields = ['expiry_date', 'created_at', 'updated_at', 'created_by', 'updated_by']
 
 

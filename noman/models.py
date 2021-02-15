@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from datetime import datetime
 from .import methods
@@ -125,15 +126,17 @@ class Payment(DefaultClass):
         pass
 
     subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE)
+    price_charged = models.IntegerField(default=0, verbose_name='Due Amount')
     amount = models.IntegerField()
     payment_date = models.DateField()
-    price_charged = models.IntegerField(default=0)
     created_at = models.DateTimeField()
     renewal_start_date = models.DateField()
     renewal_end_date = models.DateField()
 
     def __str__(self):
         return '{}-{}'.format(self.subscription.__str__(), self.amount)
+
+    amount_error = None
 
     def save(self, *args, **kwargs):
         renewal_start_date = self.renewal_start_date or self.payment_date
@@ -160,7 +163,13 @@ class Payment(DefaultClass):
             amount -= last_payment.amount
             price_charged -= last_payment.price_charged
 
-        self.subscription.client.balance = customer_balance + amount - price_charged
+        customer_balance = customer_balance + amount - price_charged
+        if self.subscription.client.balance < 0:
+            amount_error = 'Amount must be greater than or equal to ' + str(amount + (customer_balance * -1))
+            raise ValueError(
+                amount_error
+            )
+
         self.subscription.client.save()
         self.renewal_start_date = renewal_start_date
         renewal_end_date = add_one_month_to_date(renewal_start_date)
