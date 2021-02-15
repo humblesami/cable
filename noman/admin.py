@@ -40,7 +40,7 @@ class PackageAdmin(AbstractAdmin):
 
 class ClientAdmin(AbstractAdmin):
     list_display = ['area', 'name','mobile','email', 'balance']
-    search_fields = ['package', 'area']
+    search_fields = ['name', 'email', 'mobile', 'area__name']
     fields = ['area', 'name','mobile','email', 'cnic', 'balance']
     readonly_fields = ['balance', 'created_at', 'updated_at', 'created_by', 'updated_by']
 

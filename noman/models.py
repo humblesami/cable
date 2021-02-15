@@ -141,7 +141,7 @@ class Payment(DefaultClass):
 
         # in case of first subscription or subscription after service terminated
         customer_balance = self.subscription.client.balance or 0
-        if (not self.subscription.active) or (self.pk and len(self.subscription.payments) <= 1):
+        if (not self.subscription.active) or (len(self.subscription.payments) <= 1):
             price_charged += self.subscription.connection_charges
 
         if self.subscription.active:
