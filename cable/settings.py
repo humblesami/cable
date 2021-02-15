@@ -139,13 +139,9 @@ if os.path.exists(config_path):
         config_info = json.load(site_config)
         env = config_info.get('env')
         if env == 'local':
-            DATABASES['default'] = {
-                "ENGINE": "django.db.backends.postgresql",
-                "HOST": "localhost",
-                "NAME": "d5ja7hl6th93a2",
-                "USER": "odoo",
-                "PASSWORD": "123"
-            }
+            if config_info.get('db_info'):
+                if config_info.get('db_info').get('config'):
+                    DATABASES['default'] = config_info.get('db_info').get('config')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

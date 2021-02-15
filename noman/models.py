@@ -17,23 +17,31 @@ class DefaultClass(models.Model):
         related_name='%(app_label)s_%(class)s_updated_by',
         related_query_name='%(app_label)s_%(class)s_updated_by'
     )
+
     class Meta:
         abstract = True
 
 
-# class AreaManager(models.Manager):
-#     def get_queryset(self):
-#         return super().get_queryset().filter(active=True)
+class AreaManager(models.Manager):
+    def get_queryset(self):
+        res = super().get_queryset().filter(status=True)
+        return res
+
+
+class AreaManagerAll(models.Manager):
+    def get_queryset(self):
+        res = super().get_queryset()
+        return res
 
 
 class Area(DefaultClass):
     class Meta:
-        ordering  = ('name', 'created_at')
+        ordering = ('-status', 'name', 'created_at')
 
-    #objects = AreaManager()
-    name= models.CharField(max_length=200)
+    objects = AreaManager()
+    full = AreaManagerAll()
+    name = models.CharField(max_length=200)
     status = models.BooleanField()
-    # created_at = models.DateTimeField()
 
     def __str__(self):
         return self.name
@@ -49,7 +57,6 @@ class PackageType(DefaultClass):
 class Package(DefaultClass):
     class Meta:
         pass
-        #verbose_name_plural = 'Sami'
 
     name= models.CharField(max_length=200)
     status = models.BooleanField()
@@ -94,118 +101,72 @@ class Client(DefaultClass):
         pass
 
 
-class ClientPackage(DefaultClass):
-    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+class Subscription(DefaultClass):
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='subscriptions')
     package = models.ForeignKey(Package, on_delete=models.CASCADE)
     price = models.IntegerField(default=0)
     connection_charges = models.IntegerField(default=0)
     connection_date = models.DateField()
+    expiry_date = models.DateField(null=True)
     active = models.BooleanField(default=False)
-
 
     def __str__(self):
         return self.client.name + '-' + self.package.name
 
     def save(self, *args, **kwargs):
+        if not self.expiry_date:
+            self.active = False
         res = super().save(args, kwargs)
-        self.client.balance = self.price + self.connection_charges
-        self.client.save()
         return res
 
 
 class Payment(DefaultClass):
     class Meta:
         pass
-        #verbose_name_plural = 'Sami'
 
-    client_package = models.ForeignKey(ClientPackage, on_delete=models.CASCADE)
+    subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE)
     amount = models.IntegerField()
     payment_date = models.DateField()
     created_at = models.DateTimeField()
-    is_renew = models.BooleanField(null=True, blank=True)
+    renewal_start_date = models.DateField()
+    renewal_end_date = models.DateField()
 
     def __str__(self):
-        return '{}-{}-{}'.format(self.client_package.client.name, self.amount, self.payment_date)
-
-
+        return '{}-{}'.format(self.subscription.__str__(), self.amount)
 
     def save(self, *args, **kwargs):
-        creating = False
-        if not self.pk:
-            creating = True
-            self.created_at = datetime.now()
-        res = super().save(args, kwargs)
-
-        if creating:
-            # price = self.client_package.price if self.client_package.price else 0
-            # balance = self.client_package.client.balance if self.client_package.client.balance else 0
-            # total_payable = price + balance
-            # remaining_payables = total_payable - self.amount
-            # if remaining_payables < 0:
-            #     # in case client pay extra amount in advance
-            #     pass
-            # else:
-            #     self.client_package.client.balance = remaining_payables
-            #     self.client_package.client.save()
-
-            new_subscription = Subscription(
-                client_package_id=self.client_package.id,
-                start_date=self.payment_date,
-                payment_id=self.id
-            )
-            new_subscription.save()
-
-        return res
-
-
-class Subscription(DefaultClass):
-    client_package = models.ForeignKey(ClientPackage, on_delete=models.CASCADE)
-    start_date = models.DateField()
-    end_date = models.DateField()
-    payment = models.ForeignKey(Payment, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return 'Subscription-{}-{}-From: {}-To: {}'.format(self.client_package.client.name, self.payment.amount, self.start_date, self.end_date)
-
-
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        price = self.client_package.price
+        renewal_start_date = self.renewal_start_date or self.payment_date
+        price = self.subscription.price
         # in case of first subscription or subscription after service terminated
-        if not self.client_package.active:
-            price += self.client_package.connection_charges
-        if self.client_package.active:
-            obj = Subscription.objects.filter(client_package_id=self.client_package.id).order_by('end_date')
-            if len(obj):
-                last_obj = obj[len(obj) - 1]
-                if last_obj.end_date > self.start_date:
-                    diff_days = get_days_difference(last_obj.start_date, last_obj.end_date)
-                    self.start_date = add_days(last_obj.start_date, diff_days)
+        if not self.subscription.active:
+            price += self.subscription.connection_charges
+        if self.subscription.active:
+            last_obj = Payment.objects.filter(subscription_id=self.subscription.id).order_by('renewal_end_date').last()
+            if len(last_obj):
+                if last_obj.renewal_end_date > self.renewal_start_date:
+                    diff_days = get_days_difference(last_obj.renewal_start_date, last_obj.renewal_end_date)
+                    renewal_start_date = add_days(last_obj.renewal_start_date, diff_days)
 
-        balance = self.client_package.client.balance
+        balance = self.subscription.client.balance
         balance = balance if balance else 0
 
         if balance > price:
             # in case of advance payment
-
-            # months = price % self.client_package.client.balance
-            # end_date = add_months(self.start_date, months)
-            # self.end_date=end_date
+            # months = price % self.subscription.client.balance
+            # renewal_end_date = add_months(self.renewal_start_date, months)
+            # self.renewal_end_date=renewal_end_date
             pass
         else:
-            amount = self.payment.amount
-            amount = amount if amount else 0
-            payable = 0
-            if self.payment.is_renew:
-                package_price = self.client_package.price
-                package_price = package_price if package_price else 0
-                payable = balance + package_price - amount
-            else:
-                payable = balance - amount
-            self.client_package.client.balance = payable
-            self.client_package.client.save()
-            self.end_date = add_one_month_to_date(self.start_date)
-        res = super().save()
+            amount = self.amount
+            self.subscription.client.balance = self.subscription.client.balance + amount - price
+            self.subscription.client.save()
+            self.renewal_start_date = renewal_start_date
+            renewal_end_date = add_one_month_to_date(renewal_start_date)
+            self.renewal_end_date = renewal_end_date
+
+        res = super().save(args, kwargs)
+        self.subscription.expiry_date = renewal_end_date
+        self.subscription.save()
         return res
 
 
@@ -215,6 +176,7 @@ def add_months(source_date, months):
 
 
 def add_one_month_to_date(given_date):
+    given_date = methods.add_interval('days', 1, given_date)
     return add_months(given_date, 1)
 
 

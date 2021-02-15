@@ -1,11 +1,12 @@
 from django.contrib import admin
-from .models import Area, Package, PackageType, Client, ClientPackage, Subscription, Payment
+from .models import Area, Package, PackageType, Client, Subscription, Payment
 from datetime import datetime
 
 
 class AbstractAdmin(admin.ModelAdmin):
 
     readonly_fields = ['created_at', 'updated_at', 'created_by', 'updated_by']
+
     def save_model(self, request, obj, form, change):
         obj.user = request.user
         if obj.pk:
@@ -21,9 +22,13 @@ class AreaAdmin(AbstractAdmin):
     list_display = ['name', 'status', 'created_at']
     list_filter = ['status']
 
+    def get_queryset(self, request):
+        qs = Area.full.all()
+        return qs
+
 
 class PackageTypeAdmin(AbstractAdmin):
-    list_display= ['name']
+    list_display = ['name']
     search_fields = ['name']
 
 
@@ -40,42 +45,25 @@ class ClientAdmin(AbstractAdmin):
     readonly_fields = ['start_date', 'end_date', 'balance', 'created_at', 'updated_at', 'created_by', 'updated_by']
 
     def start_date(self, obj):
-        client_package = obj.clientpackage_set.all()
-        if client_package:
-            client_package = list(client_package)[-1]
-            subscription = client_package.subscription_set.all()
-            if subscription:
-                subscription = list(subscription)[-1]
-                return subscription.start_date
-        return ''
+        subscription = obj.subscriptions.last().subscription_set.last()
+        return subscription.start_date or ''
     
     def end_date(self, obj):
-        client_package = obj.clientpackage_set.all()
-        if client_package:
-            client_package = list(client_package)[-1]
-            subscription = client_package.subscription_set.all()
-            if subscription:
-                subscription = list(subscription)[-1]
-                return subscription.end_date
-        return ''
+        subscription = obj.subscriptions.last().subscription_set.last()
+        return subscription.last_date or ''
 
 
 class PaymentAdmin(AbstractAdmin):
-    pass
+    readonly_fields = ['renewal_start_date', 'renewal_end_date', 'created_at', 'updated_at', 'created_by', 'updated_by']
 
 
 class SubscriptionAdmin(AbstractAdmin):
-    pass
-
-
-class ClientPackageAdmin(AbstractAdmin):
-    pass
+    readonly_fields = ['expiry_date', 'created_at', 'updated_at', 'created_by', 'updated_by']
 
 
 admin.site.register(Area, AreaAdmin)
 admin.site.register(PackageType,PackageTypeAdmin)
 admin.site.register(Package, PackageAdmin)
 admin.site.register(Client, ClientAdmin)
-admin.site.register(ClientPackage, ClientPackageAdmin)
 admin.site.register(Payment, PaymentAdmin)
 admin.site.register(Subscription, SubscriptionAdmin)
