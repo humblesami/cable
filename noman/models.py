@@ -127,6 +127,7 @@ class Payment(DefaultClass):
     subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE)
     amount = models.IntegerField()
     payment_date = models.DateField()
+    price_charged = models.IntegerField(default=0)
     created_at = models.DateTimeField()
     renewal_start_date = models.DateField()
     renewal_end_date = models.DateField()
@@ -136,10 +137,13 @@ class Payment(DefaultClass):
 
     def save(self, *args, **kwargs):
         renewal_start_date = self.renewal_start_date or self.payment_date
-        price = self.subscription.price
+        price_charged = self.subscription.price
+
         # in case of first subscription or subscription after service terminated
-        if not self.subscription.active:
-            price += self.subscription.connection_charges
+        customer_balance = self.subscription.client.balance or 0
+        if (not self.subscription.active) or (self.pk and len(self.subscription.payments) <= 1):
+            price_charged += self.subscription.connection_charges
+
         if self.subscription.active:
             last_obj = Payment.objects.filter(subscription_id=self.subscription.id).order_by('renewal_end_date').last()
             if len(last_obj):
@@ -147,25 +151,23 @@ class Payment(DefaultClass):
                     diff_days = get_days_difference(last_obj.renewal_start_date, last_obj.renewal_end_date)
                     renewal_start_date = add_days(last_obj.renewal_start_date, diff_days)
 
-        balance = self.subscription.client.balance
-        balance = balance if balance else 0
+        balance = self.subscription.client.balance or 0
+        amount = self.amount
 
-        if balance > price:
-            # in case of advance payment
-            # months = price % self.subscription.client.balance
-            # renewal_end_date = add_months(self.renewal_start_date, months)
-            # self.renewal_end_date=renewal_end_date
-            pass
-        else:
-            amount = self.amount
-            self.subscription.client.balance = self.subscription.client.balance + amount - price
-            self.subscription.client.save()
-            self.renewal_start_date = renewal_start_date
-            renewal_end_date = add_one_month_to_date(renewal_start_date)
-            self.renewal_end_date = renewal_end_date
+        self.price_charged = price_charged
+        if self.pk:
+            last_payment = Payment.objects.filter(id=self.pk)[0]
+            amount -= last_payment.amount
+            price_charged -= last_payment.price_charged
+
+        self.subscription.client.balance = customer_balance + amount - price_charged
+        self.subscription.client.save()
+        self.renewal_start_date = renewal_start_date
+        renewal_end_date = add_one_month_to_date(renewal_start_date)
+        self.renewal_end_date = renewal_end_date
+        self.subscription.expiry_date = renewal_end_date
 
         res = super().save(args, kwargs)
-        self.subscription.expiry_date = renewal_end_date
         self.subscription.save()
         return res
 

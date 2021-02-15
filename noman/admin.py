@@ -39,22 +39,14 @@ class PackageAdmin(AbstractAdmin):
 
 
 class ClientAdmin(AbstractAdmin):
-    list_display = ['area', 'name','mobile','email', 'start_date', 'end_date', 'balance']
+    list_display = ['area', 'name','mobile','email', 'balance']
     search_fields = ['package', 'area']
-    fields = ['area', 'name','mobile','email', 'cnic', 'start_date', 'end_date', 'balance']
-    readonly_fields = ['start_date', 'end_date', 'balance', 'created_at', 'updated_at', 'created_by', 'updated_by']
-
-    def start_date(self, obj):
-        subscription = obj.subscriptions.last().subscription_set.last()
-        return subscription.start_date or ''
-    
-    def end_date(self, obj):
-        subscription = obj.subscriptions.last().subscription_set.last()
-        return subscription.last_date or ''
+    fields = ['area', 'name','mobile','email', 'cnic', 'balance']
+    readonly_fields = ['balance', 'created_at', 'updated_at', 'created_by', 'updated_by']
 
 
 class PaymentAdmin(AbstractAdmin):
-    readonly_fields = ['renewal_start_date', 'renewal_end_date', 'created_at', 'updated_at', 'created_by', 'updated_by']
+    readonly_fields = ['renewal_start_date', 'renewal_end_date', 'price_charged', 'created_at', 'updated_at', 'created_by', 'updated_by']
 
 
 class SubscriptionAdmin(AbstractAdmin):

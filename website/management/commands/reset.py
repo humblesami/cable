@@ -25,7 +25,7 @@ class Command(BaseCommand):
     def connect_host(self, database_info, active_db):
         con = 'Unsupported db engine'
         if active_db == 'postgresql':
-            con = con = connect(
+            con = connect(
                 database='postgres',
                 user=database_info['USER'],
                 password=database_info['PASSWORD'],
