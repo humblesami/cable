@@ -7,21 +7,31 @@
 {{ block.super }}
 
 <script>
-    $('#payment_form select[name="subscription"]').change(function(){
-        let subscription_id = this.value;
-        let el_due_amount = $('.field-price_charged div[readonly=1]');
-        if(!subscription_id){
-            el_due_amount.val(0);
-        }
-        let options = {
-            url: '/get_due_amount',
-            data : {subscription_id: subscription_id},
-            success:function(data){
-                el_due_amount.val(data);
+    $(function(){        
+        document.querySelector('#payment_form select[name="subscription"]').onchange=function() {            
+            let subscription_id = this.value;
+            let el_due_amount = $('.field-price_charged .readonly');            
+            if(!subscription_id){
+                el_due_amount.val(0);
+                return;
             }
-        };
-        //$.ajax(options);
+            let options = {
+                beforeSend: function(a, b){
+                    //console.log(b.url);
+                },
+                url: '/subscription/get_due_amount',
+                data : {subscription_id: subscription_id},
+                success:function(data){
+                    el_due_amount.html(data);
+                },
+                error:function(er){
+                    console.log(er);
+                }
+            };
+            $.ajax(options);
+        }
     });
+
 </script>
 
 {% endblock %}

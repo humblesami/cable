@@ -42,7 +42,7 @@ class Area(DefaultClass):
     objects = AreaManager()
     full = AreaManagerAll()
     name = models.CharField(max_length=200)
-    status = models.BooleanField()
+    status = models.BooleanField(default=True, null=True)
 
     def __str__(self):
         return self.name
