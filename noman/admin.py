@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.contrib import admin
 from django.forms import ModelForm
+from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 
 from .models import Area, Package, PackageType, Client, Subscription, Payment
@@ -15,6 +16,13 @@ class ParentModelAdmin(admin.ModelAdmin):
         js = (
             'https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js',  # jquery
         )
+
+    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
+        try:
+            res = super().changeform_view(request, object_id, form_url, extra_context)
+            return res
+        except Exception as e:
+            return HttpResponseRedirect(request.path)
 
     def changelist_view(self, request, extra_context=""):
         response = super().changelist_view(request, extra_context)
@@ -101,8 +109,10 @@ class PaymentForm(ModelForm):
             being_paid = 0
         if not due_amount:
             due_amount = 0
-        amount_error = 'Give valid amount must be non zero and at least equal to due amount='+str(due_amount)
-        if being_paid < due_amount:
+        amount_error = 'Give amount must be non zero'# and at least half of due amount='+str(due_amount)
+        valid_amount = being_paid and being_paid > 0
+        #valid_amount = being_paid and being_paid < due_amount / 2
+        if not valid_amount:
             self._errors['amount'] = self.error_class([amount_error])
         return self.cleaned_data
 
