@@ -63,7 +63,7 @@ class Package(DefaultClass):
     status = models.BooleanField()
     package_type = models.ForeignKey(PackageType, on_delete=models.CASCADE, related_name='packages', null=True)
     created_at = models.DateTimeField()
-    rate = models.IntegerField()
+    price = models.IntegerField()
     valid_for_months = models.IntegerField(default=1)
 
     def __str__(self):
@@ -126,7 +126,7 @@ class Payment(DefaultClass):
         pass
 
     subscription = models.ForeignKey(Subscription, on_delete=models.CASCADE)
-    price_charged = models.IntegerField(default=0, verbose_name='Due Amount')
+    due_amount = models.IntegerField(default=0, verbose_name='Due Amount')
     amount = models.IntegerField()
     payment_date = models.DateField()
     created_at = models.DateTimeField()
@@ -140,12 +140,12 @@ class Payment(DefaultClass):
 
     def save(self, *args, **kwargs):
         renewal_start_date = self.renewal_start_date or self.payment_date
-        price_charged = self.subscription.price
+        to_be_paid = self.subscription.price
 
         # in case of first subscription or subscription after service terminated
         customer_balance = self.subscription.client.balance or 0
         if (not self.subscription.active) or (len(self.subscription.payments) <= 1):
-            price_charged += self.subscription.connection_charges
+            to_be_paid += self.subscription.connection_charges
 
         if self.subscription.active:
             last_obj = Payment.objects.filter(subscription_id=self.subscription.id).order_by('renewal_end_date').last()
@@ -155,20 +155,15 @@ class Payment(DefaultClass):
                     renewal_start_date = add_days(last_obj.renewal_start_date, diff_days)
 
         balance = self.subscription.client.balance or 0
-        amount = self.amount
+        being_paid = self.amount
 
-        self.price_charged = price_charged
+        self.due_amount = to_be_paid
         if self.pk:
             last_payment = Payment.objects.filter(id=self.pk)[0]
-            amount -= last_payment.amount
-            price_charged -= last_payment.price_charged
+            being_paid -= last_payment.amount
+            to_be_paid -= last_payment.due_amount
 
-        customer_balance = customer_balance + amount - price_charged
-        if customer_balance < 0:
-            amount_error = 'Amount must be greater than or equal to ' + str(amount + (customer_balance * -1))
-            raise ValueError(
-                amount_error
-            )
+        customer_balance = customer_balance + being_paid - to_be_paid
 
         self.subscription.client.balance = customer_balance
         self.subscription.client.save()

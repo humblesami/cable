@@ -1,6 +1,6 @@
-from django.contrib import admin, messages
-from django.db import IntegrityError
-from django.http import HttpResponseRedirect
+from django.contrib import admin
+from django.forms import ModelForm
+from django.http import HttpResponse
 
 from .models import Area, Package, PackageType, Client, Subscription, Payment
 from datetime import datetime
@@ -61,31 +61,59 @@ class SubscriptionAdmin(AbstractAdmin):
     search_fields = ['__str__']
     readonly_fields = ['expiry_date', 'created_at', 'updated_at', 'created_by', 'updated_by']
 
+    class Media:
+        js = (
+            'https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js',
+            '/static/change_form_subscription.js',
+        )
+
+
+class PaymentForm(ModelForm):
+    class Meta:
+        model = Payment
+        exclude = []
+
+    def save(self, commit=True):
+        # Save the provided password in hashed format
+        obj = super().save(commit=False)
+        if commit:
+            obj.save()
+        return obj
+
+    def clean(self):
+        super().clean()
+        due_amount = self.cleaned_data.get('due_amount')
+        being_paid = self.cleaned_data.get('amount')
+
+        if not being_paid:
+            being_paid = 0
+        if not due_amount:
+            due_amount = 0
+        amount_error = 'Give valid amount must be non zero and at least equal to due amount='+str(due_amount)
+        if being_paid < due_amount:
+            self._errors['amount'] = self.error_class([amount_error])
+        return self.cleaned_data
+
 
 class PaymentAdmin(AbstractAdmin):
-    list_display = ['__str__', 'price_charged']
+    form = PaymentForm
+    add_form = PaymentForm
+
+    list_display = ['__str__', 'due_amount']
     search_fields = ['subscription']
-    readonly_fields = ['renewal_start_date', 'renewal_end_date', 'price_charged', 'created_at', 'updated_at', 'created_by', 'updated_by']
+    readonly_fields = ['renewal_start_date', 'renewal_end_date', 'created_at', 'updated_at', 'created_by', 'updated_by']
     autocomplete_fields = ['subscription']
 
-    def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
-        res = super(PaymentAdmin, self).render_change_form(request, context, add, change, form_url, obj)
-        return res
-
-        # return TemplateResponse(request, form_template or [
-        #     "admin/%s/%s/change_form.html" % (app_label, opts.model_name),
-        #     "admin/%s/change_form.html" % app_label,
-        #     "admin/change_form.html"
-        # ], context)
+    class Media:
+        js = (
+            'https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js',
+            '/static/change_form_payment.js',
+        )
+        css = {
+            'all': ('/static/payment.css ',)
+        }
 
     def save_model(self, request, obj, form, change):
-        obj.user = request.user
-        if obj.pk:
-            obj.updated_by_id = obj.user.id
-            obj.updated_at = datetime.now()
-        else:
-            obj.created_by_id = obj.user.id
-            obj.created_at = datetime.now()
         super().save_model(request, obj, form, change)
 
 
