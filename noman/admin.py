@@ -1,12 +1,13 @@
-from django.contrib import admin
-from django.forms import ModelForm
-from django.http import HttpResponse
-
-from .models import Area, Package, PackageType, Client, Subscription, Payment
 from datetime import datetime
 
+from django.contrib import admin
+from django.forms import ModelForm
+from django.template.response import TemplateResponse
 
-class AbstractAdmin(admin.ModelAdmin):
+from .models import Area, Package, PackageType, Client, Subscription, Payment
+
+
+class ParentModelAdmin(admin.ModelAdmin):
 
     readonly_fields = ['created_at', 'updated_at', 'created_by', 'updated_by']
 
@@ -14,6 +15,17 @@ class AbstractAdmin(admin.ModelAdmin):
         js = (
             'https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js',  # jquery
         )
+
+    def changelist_view(self, request, extra_context=""):
+        response = super().changelist_view(request, extra_context)
+        group_id = request.GET.get('group_id', None)
+        if group_id:
+            extra_context = {
+                'group_id': group_id,
+            }
+            response.context_data.update(extra_context)
+        #response = TemplateResponse(request, "admin/noman/change_list.html", response.context_data)
+        return response
 
     def save_model(self, request, obj, form, change):
         obj.user = request.user
@@ -26,7 +38,7 @@ class AbstractAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
 
-class AreaAdmin(AbstractAdmin):
+class AreaAdmin(ParentModelAdmin):
     list_display = ['name', 'status', 'created_at']
     search_fields = ['name']
     list_filter = ['status']
@@ -36,19 +48,19 @@ class AreaAdmin(AbstractAdmin):
         return qs
 
 
-class PackageTypeAdmin(AbstractAdmin):
+class PackageTypeAdmin(ParentModelAdmin):
     list_display = ['name']
     search_fields = ['name']
 
 
-class PackageAdmin(AbstractAdmin):
+class PackageAdmin(ParentModelAdmin):
     list_display= ['name', 'package_type']
     search_fields = ['name', 'package_type']
     list_filter = ['package_type']
     autocomplete_fields = ['package_type']
 
 
-class ClientAdmin(AbstractAdmin):
+class ClientAdmin(ParentModelAdmin):
     list_display = ['area', 'name','mobile','email', 'balance']
     search_fields = ['name', 'email', 'mobile', 'area']
     fields = ['area', 'name','mobile','email', 'cnic', 'balance']
@@ -56,7 +68,7 @@ class ClientAdmin(AbstractAdmin):
     autocomplete_fields = ['area']
 
 
-class SubscriptionAdmin(AbstractAdmin):
+class SubscriptionAdmin(ParentModelAdmin):
     list_display = ['__str__', 'price', 'connection_charges']
     search_fields = ['__str__']
     readonly_fields = ['expiry_date', 'created_at', 'updated_at', 'created_by', 'updated_by']
@@ -95,7 +107,7 @@ class PaymentForm(ModelForm):
         return self.cleaned_data
 
 
-class PaymentAdmin(AbstractAdmin):
+class PaymentAdmin(ParentModelAdmin):
     form = PaymentForm
     add_form = PaymentForm
 

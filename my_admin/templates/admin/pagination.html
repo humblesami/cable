@@ -1,0 +1,64 @@
+{% load admin_list %}
+{% load i18n %}
+{% if pagination_required %}
+    <div style="padding-right:1em">
+        <form id="pagination_form" >
+            <span>Go to page number</span>
+            <input id="pno" type="number" value="{{ cl.page_num }}">
+            <button type="submit">Go</button>
+        </form>
+        <script>
+            (function(){
+                let pn = $('#pno').val();
+                try{
+                    pn = parseInt(pn);
+                }
+                catch{
+                    pn = 0;
+                }
+                pn = pn + 1;
+                $('#pno').val(pn);
+                let curl = window.location.href.split('?')[0];
+                pn -= 1;
+                let ref_url = curl+'?p='+pn;
+                console.log(ref_url);
+                let go_to_page = function(e){
+                    console.log(55544);
+                    e.preventDefault();
+                    pn = $('#pno').val();
+                    if (isNaN(pn)){
+                        return;
+                    }
+                    pn = parseInt(pn) - 1;
+                    if(pn<1){
+                        return;
+                    }
+                    curl = window.location.href.split('?')[0];
+                    ref_url = curl+'?p='+pn;
+                    window.location = ref_url;
+                };
+                $('#pagination_form').submit(go_to_page);
+            })();
+        </script>
+    </div>
+    <p class="paginator">
+        {% for i in page_range %}
+            {% paginator_number cl i %}
+        {% endfor %}
+        <span> Summary : Total </span>
+        {{ cl.result_count }}
+        {% if cl.result_count == 1 %}
+            {{ cl.opts.verbose_name }}
+        {% else %}
+            {{ cl.opts.verbose_name_plural }}
+        {% endif %}
+
+        {% if show_all_url %}
+            <a href="{{ show_all_url }}" class="showall">{% translate 'Show all' %}</a>
+        {% endif %}
+
+        {% if cl.formset and cl.result_count %}
+            <input type="submit" name="_save" class="default" value="{% translate 'Save' %}">
+        {% endif %}
+    </p>
+{% endif %}
