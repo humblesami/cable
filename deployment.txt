@@ -144,35 +144,36 @@ pip install -r requirements.txt
 
 sudo nano /etc/apache2/sites-available/my_site.conf
 
+If you ever face python encoding error then please just make sure
+you are using compatible version of django and python plus
+your following paths are accurate like following
+
 <VirtualHost *:80>
-	ServerAdmin admin@my_site.com
-	ServerName my_site.com
-	ServerAlias www.my_site.com
-	DocumentRoot /path/to/python-site
-	ErrorLog ${APACHE_LOG_DIR}/error.log
-	CustomLog ${APACHE_LOG_DIR}/access.log combined
+        ServerName polls.local
+        ServerAlias www.polls.local
+        DocumentRoot /home/sami/django/isolated-db
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
 
-	#only for django
-	Alias /static /path/to/python-site/static
-	<Directory /path/to/python-site/static>
-		Require all granted
-	</Directory>
+        Alias /static /home/sami/django/isolated-db/static
+        <Directory /home/sami/django/isolated-db/static>
+                Require all granted
+        </Directory>
 
-	#only for django
-	Alias /static /path/to/python-site/media
-	<Directory /path/to/python-site/media>
-		Require all granted
-	</Directory>
+        Alias /static /home/sami/django/isolated-db/media
+        <Directory /home/sami/django/isolated-db/media>
+                Require all granted
+        </Directory>
 
-	<Directory /path/to/python-site/main_app>
-		<Files wsgi.py>
-			Require all granted
-		</Files>
-	</Directory>
+        <Directory /home/sami/django/isolated-db/pollsapi>
+                <Files wsgi.py>
+                        Require all granted
+                </Files>
+        </Directory>
 
-	WSGIDaemonProcess process_group_name python-path=/path/to/python-site python-home=/path/to/python-site/env
-	WSGIProcessGroup process_group_name
-	WSGIScriptAlias / /path/to/python-site/main_app/wsgi.py
+        WSGIDaemonProcess videotest python-path=/home/sami/django/isolated-db python-home=/home/sami/vens/isolated-db
+        WSGIProcessGroup videotest
+        WSGIScriptAlias / /home/sami/django/isolated-db/pollsapi/wsgi.py
 </VirtualHost>
 
 

@@ -13,3 +13,4 @@ config.json
 /media/*
 /static/*
 /django
+__pycache__
