@@ -75,7 +75,16 @@ class Command(BaseCommand):
 
         db_cursor = db_host_connection.cursor()
         if hard_reset:
-            db_cursor.execute('DROP DATABASE if exists ' + db_config['NAME'])
+            db_name = db_config['NAME']
+            stmt = """
+                        SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity
+                        WHERE pg_stat_activity.datname='""" + db_name + """'
+                        """
+            db_cursor.execute(stmt)
+            stmt = 'DROP DATABASE if exists ' + db_name
+            db_cursor.execute(stmt)
+
+            db_cursor.execute('DROP DATABASE if exists ' + db_name)
             db_cursor.execute('CREATE DATABASE ' + db_config['NAME'])
             res = 'done'
         elif create:
