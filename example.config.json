@@ -1,0 +1,13 @@
+{
+  "db_info": {
+    "name": "postgresql",
+    "config": {
+      "ENGINE": "django.db.backends.postgresql",
+      "HOST": "localhost",
+      "NAME": "d5ja7hl6th93a2",
+      "USER": "odoo",
+      "PASSWORD": "123"
+    }
+  },
+  "env": "local"
+}
