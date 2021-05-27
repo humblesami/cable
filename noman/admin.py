@@ -5,7 +5,7 @@ from django.forms import ModelForm
 from django.http import HttpResponseRedirect
 from django.template.response import TemplateResponse
 
-from .models import Area, Package, PackageType, Client, Subscription, Payment
+from .models import Area, SaleObject, Client, Subscription, Payment
 
 
 class ParentModelAdmin(admin.ModelAdmin):
@@ -56,16 +56,9 @@ class AreaAdmin(ParentModelAdmin):
         return qs
 
 
-class PackageTypeAdmin(ParentModelAdmin):
+class SaleObjectAdmin(ParentModelAdmin):
     list_display = ['name']
     search_fields = ['name']
-
-
-class PackageAdmin(ParentModelAdmin):
-    list_display= ['name', 'package_type']
-    search_fields = ['name', 'package_type']
-    list_filter = ['package_type']
-    autocomplete_fields = ['package_type']
 
 
 class ClientAdmin(ParentModelAdmin):
@@ -77,14 +70,14 @@ class ClientAdmin(ParentModelAdmin):
 
 
 class SubscriptionAdmin(ParentModelAdmin):
-    list_display = ['__str__', 'price', 'connection_charges']
+    list_display = ['__str__', 'installment', 'initial_charges']
     search_fields = ['__str__']
     readonly_fields = ['expiry_date', 'created_at', 'updated_at', 'created_by', 'updated_by']
 
     class Media:
         js = (
             'https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js',
-            '/static/change_form_subscription.js',
+            '/static/noman/change_form_subscription.js',
         )
 
 
@@ -129,7 +122,7 @@ class PaymentAdmin(ParentModelAdmin):
     class Media:
         js = (
             'https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js',
-            '/static/change_form_payment.js',
+            '/static/noman/change_form_payment.js',
         )
         css = {
             'all': ('/static/payment.css ',)
@@ -140,8 +133,7 @@ class PaymentAdmin(ParentModelAdmin):
 
 
 admin.site.register(Area, AreaAdmin)
-admin.site.register(PackageType,PackageTypeAdmin)
-admin.site.register(Package, PackageAdmin)
+admin.site.register(SaleObject,SaleObjectAdmin)
 admin.site.register(Client, ClientAdmin)
 admin.site.register(Subscription, SubscriptionAdmin)
 admin.site.register(Payment, PaymentAdmin)

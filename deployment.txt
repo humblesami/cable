@@ -32,7 +32,7 @@ sudo apachectl start
 
 sudo apt-get install postgresql postgresql-contrib libpq-dev
 sudo apt install curl
-curl https://www.pgadmin.org/static/packages_pgadmin_org.pub | sudo apt-key add
+curl https://www.pgadmin.org/static/products_pgadmin_org.pub | sudo apt-key add
 sudo sh -c 'echo "deb https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/$(lsb_release -cs) pgadmin4 main" > /etc/apt/sources.list.d/pgadmin4.list && apt update'
 sudo apt install pgadmin4-desktop
 

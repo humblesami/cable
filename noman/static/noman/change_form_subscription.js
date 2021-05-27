@@ -1,12 +1,12 @@
 $(function(){
-    if(!document.querySelector('#subscription_form select[name="package"]'))
+    if(!document.querySelector('#subscription_form select[name="sale_object"]'))
     {
         return;
     }
-    document.querySelector('#subscription_form select[name="package"]').onchange=function() {
-        let package_id = this.value;
-        let el_due_amount = $('#subscription_form input[name="price"]');
-        if(!package_id){
+    document.querySelector('#subscription_form select[name="sale_object"]').onchange=function() {
+        let sale_object_id = this.value;
+        let el_due_amount = $('#subscription_form input[name="installment"]');
+        if(!sale_object_id){
             el_due_amount.val(0);
             return;
         }
@@ -14,8 +14,8 @@ $(function(){
             beforeSend: function(a, b){
                 //console.log(b.url);
             },
-            url: '/package/charges',
-            data : {package_id: package_id},
+            url: '/sale_object/charges',
+            data : {sale_object_id: sale_object_id},
             success:function(data){
                 el_due_amount.val(data);
             },
@@ -26,4 +26,4 @@ $(function(){
         $.ajax(options);
     }
 });
-name="package"
+name="sale_object"

@@ -7,7 +7,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from noman.methods import now_str
-from noman.models import Area, Subscription, Package
+from noman.models import Area, Subscription, SaleObject
 
 
 def get_subscription_charges(request):
@@ -16,18 +16,18 @@ def get_subscription_charges(request):
     if subscription_id:
         subscription_id = int(subscription_id)
         obj = Subscription.objects.get(pk=subscription_id)
-        res = obj.price
+        res = obj.installment
     res = HttpResponse(res)
     return res
 
 
 def get_due_amount(request):
-    package_id = request.GET.get('package_id')
+    sale_object_id = request.GET.get('sale_object_id')
     res = ''
-    if package_id:
-        package_id = int(package_id)
-        obj = Package.objects.get(pk=package_id)
-        res = obj.price
+    if sale_object_id:
+        sale_object_id = int(sale_object_id)
+        obj = SaleObject.objects.get(pk=sale_object_id)
+        res = obj.installment
     res = HttpResponse(res)
     return res
 

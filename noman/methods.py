@@ -208,7 +208,7 @@ def get_error_message():
     cnt = 0
     for er in eg:
         cnt += 1
-        if not 'lib/python' in er and not 'lib\site-packages' in er:
+        if not 'lib/python' in er and not 'lib\site-products' in er:
             error_message += " " + er
     return error_message
 

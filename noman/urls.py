@@ -4,6 +4,6 @@ from noman.views import index, million_areas, get_due_amount, get_subscription_c
 urlpatterns = [
     path('', index),
     path('subscription/charges', get_subscription_charges),
-    path('package/charges', get_due_amount),
+    path('sale_object/charges', get_due_amount),
     path('million/area', million_areas),
 ]

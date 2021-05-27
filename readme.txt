@@ -6,7 +6,7 @@ python manage.py reset other follow these
 
 3. make virtual environment
 On macOS and Linux:
-python3 -m venv env
+python3 -m venv /path/to/any_name_of_env
 On Windows: py -m venv /path/to/any_name_of_env
 
 Activate venv

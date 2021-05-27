@@ -48,37 +48,16 @@ class Area(DefaultClass):
         return self.name
 
 
-class PackageType(DefaultClass):
+class SaleObject(DefaultClass):
     name = models.CharField(max_length=200)
 
     def __str__(self):
         return self.name
 
 
-class Package(DefaultClass):
-    class Meta:
-        pass
-
-    name= models.CharField(max_length=200)
-    status = models.BooleanField()
-    package_type = models.ForeignKey(PackageType, on_delete=models.CASCADE, related_name='packages', null=True)
-    created_at = models.DateTimeField()
-    price = models.IntegerField()
-    valid_for_months = models.IntegerField(default=1)
-
-    def __str__(self):
-        return self.name
-
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            self.created_at = datetime.now()
-        res = super().save(args, kwargs)
-        return res
-
-
 class Client(DefaultClass):
     name= models.CharField(max_length=200)
-    area = models.ForeignKey(Area, related_name='clients', on_delete=models.CASCADE)
+    area = models.ForeignKey(Area, related_name='clients', null=True, blank=True, on_delete=models.CASCADE)
 
     father_name= models.CharField(max_length=200, null=True, blank=True)
     mobile = models.CharField(max_length=200, null=True, blank=True)
@@ -95,6 +74,18 @@ class Client(DefaultClass):
         pass
         # verbose_name_plural = 'Sami'
 
+    def get_months(self, purchase_date, now=None):
+        return 0
+
+    def next_payment(self):
+        things = self.subscriptions.all()
+        to_give = 0
+        for obj in things:
+            to_give = obj.initial_charges
+            months = self.get_months(obj.purchase_date)
+            to_give += months * obj.installment
+        return to_give
+
     def __str__(self):
         return self.name
 
@@ -104,15 +95,19 @@ class Client(DefaultClass):
 
 class Subscription(DefaultClass):
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='subscriptions')
-    package = models.ForeignKey(Package, on_delete=models.CASCADE)
-    price = models.IntegerField(default=0)
-    connection_charges = models.IntegerField(default=0)
-    connection_date = models.DateField()
+    sale_object = models.ForeignKey(SaleObject, on_delete=models.CASCADE)
+    installment = models.IntegerField(default=0)
+    initial_charges = models.IntegerField(default=0)
+    purchase_date = models.DateField()
     expiry_date = models.DateField(null=True)
     active = models.BooleanField(default=False)
+    duration_months = models.IntegerField(default=1)
+
+    def get_total(self):
+        return 0
 
     def __str__(self):
-        return self.client.name + '-' + self.package.name
+        return self.client.name + '-' + self.sale_object.name
 
     def save(self, *args, **kwargs):
         if not self.expiry_date:
@@ -140,7 +135,7 @@ class Payment(DefaultClass):
 
     def save(self, *args, **kwargs):
         renewal_start_date = self.renewal_start_date or self.payment_date
-        to_be_paid = self.subscription.price
+        to_be_paid = self.subscription.installment
 
         # in case of first subscription or subscription after service terminated
         customer_balance = self.subscription.client.balance or 0
